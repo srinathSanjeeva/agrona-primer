@@ -1,4 +1,5 @@
-# Agrona Primer
+# 🧬 Low Latency Playground with Agrona & AgentRunner
+
 
 [![Build](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/your-username/agrona-primer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
