@@ -1,7 +1,7 @@
 package com.sanjeevas.agrona.config;
 
 import org.agrona.concurrent.ringbuffer.RingBufferDescriptor;
-import org.agrona.concurrent.status.CountersManager;
+import org.agrona.concurrent.status.CountersReader;
 
 /**
  * Utility class for computing recommended buffer sizes
@@ -37,8 +37,8 @@ public final class BufferConfig {
      * @return array [metadataBufferSize, valuesBufferSize]
      */
     public static int[] countersManagerSizes(int numCounters) {
-        int metadataSize = CountersManager.METADATA_LENGTH * numCounters;
-        int valuesSize = CountersManager.COUNTER_LENGTH * numCounters;
+        int metadataSize = CountersReader.METADATA_LENGTH * numCounters;
+        int valuesSize = CountersReader.COUNTER_LENGTH * numCounters;
         return new int[]{metadataSize, valuesSize};
     }
 

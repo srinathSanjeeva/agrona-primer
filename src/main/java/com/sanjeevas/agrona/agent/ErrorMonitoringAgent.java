@@ -7,13 +7,9 @@ import org.agrona.concurrent.Agent;
 import org.agrona.concurrent.EpochClock;
 import org.agrona.concurrent.status.AtomicCounter;
 import org.agrona.concurrent.errors.DistinctErrorLog;
-import org.agrona.concurrent.UnsafeBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ErrorMonitoringAgent implements Agent {
 
@@ -28,8 +24,6 @@ public class ErrorMonitoringAgent implements Agent {
     private final ObjectHashSet<String> printedStackTraces = new ObjectHashSet<>();
     // A Object2HasMap to store error details
     private final Object2ObjectHashMap<String, Throwable> errorDetailsMap = new Object2ObjectHashMap<>();
-
-
 
 
     private long lastLogTimeMillis = 0;
@@ -66,7 +60,7 @@ public class ErrorMonitoringAgent implements Agent {
         return "error-monitoring-agent";
     }
 
-    public void record(Throwable t) {
+    public void recordException(Throwable t) {
         errorLog.record(t);
         tickCounter.increment();
 

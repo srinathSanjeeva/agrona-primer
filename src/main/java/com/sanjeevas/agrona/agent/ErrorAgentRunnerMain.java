@@ -43,7 +43,7 @@ public class ErrorAgentRunnerMain {
 
         // Simulate periodic errors
         for (int i = 0; i < 10; i++) {
-            agent.record(new RuntimeException("Simulated issue #" + i));
+            agent.recordException(new RuntimeException("Simulated issue #" + i));
             try {
                 Thread.sleep(700); // simulate runtime
             } catch (InterruptedException e) {

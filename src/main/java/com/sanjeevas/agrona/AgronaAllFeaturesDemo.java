@@ -1,6 +1,5 @@
 package com.sanjeevas.agrona;
 
-import org.agrona.*;
 import org.agrona.collections.*;
 import org.agrona.concurrent.*;
 import org.agrona.concurrent.errors.DistinctErrorLog;
@@ -24,6 +23,7 @@ public class AgronaAllFeaturesDemo {
 
     public static void main(String[] args) throws IOException {
 
+        // ========== Buffer Initialization ==========
         // ========== Buffers ==========
         AtomicBuffer onHeapBuffer = new UnsafeBuffer(new byte[64]);
         AtomicBuffer offHeapBuffer = new UnsafeBuffer(ByteBuffer.allocateDirect(64));
@@ -113,28 +113,39 @@ public class AgronaAllFeaturesDemo {
         UnsafeBuffer valuesBuffer = new UnsafeBuffer(ByteBuffer.allocateDirect(valuesBufferSize));
 
         CountersManager countersManager = new CountersManager(labelsBuffer, valuesBuffer);
-        AtomicCounter ordersCounter = countersManager.newCounter("orders-tracked");
-        ordersCounter.increment();
-        logger.info("Orders counter: {}", ordersCounter.get());
+        // Wrap the created AtomicCounters in try‑with‑resources.
+        try (AtomicCounter ordersCounter = countersManager.newCounter("orders-tracked");
+             AtomicCounter tradesCounter = countersManager.newCounter("trades-executed")) {
+
+            ordersCounter.increment();
+            logger.info("Orders counter: {}", ordersCounter.get());
+
+            tradesCounter.increment();
+            logger.info("Trades counter: {}", tradesCounter.get());
+        }
 
 
         // ========== Stream wrappers ==========
         UnsafeBuffer streamBuf = new UnsafeBuffer(ByteBuffer.allocateDirect(64));
-        DirectBufferOutputStream outputStream = new DirectBufferOutputStream(streamBuf);
-        outputStream.write("streamData".getBytes(StandardCharsets.UTF_8));
+        try (DirectBufferOutputStream outputStream = new DirectBufferOutputStream(streamBuf)) {
+            outputStream.write("streamData".getBytes(StandardCharsets.UTF_8));
+        }
 
-        DirectBufferInputStream inputStream = new DirectBufferInputStream(streamBuf);
-
-        byte[] streamBytes = new byte["streamData".length()];
-        inputStream.read(streamBytes);
-        logger.info("Read from DirectBufferInputStream: {}", new String(streamBytes, StandardCharsets.UTF_8));
+        try (DirectBufferInputStream inputStream = new DirectBufferInputStream(streamBuf)) {
+            byte[] streamBytes = new byte["streamData".length()];
+            int numBytesRead = inputStream.read(streamBytes);
+            if (numBytesRead == -1) {
+                logger.error("End of stream reached");
+            } else {
+                logger.info("Number of bytes read: {}", numBytesRead);
+            }
+            logger.info("Read from DirectBufferInputStream: {}", new String(streamBytes, StandardCharsets.UTF_8));
+        }
 
         // ========== Error Log ==========
         UnsafeBuffer errorBuffer = new UnsafeBuffer(ByteBuffer.allocateDirect(4096));
-        ErrorConsumer errorConsumer = (count, first, last, error) -> {
-                logger.error("Observed non-Throwable error: {}", error);
+        ErrorConsumer errorConsumer = (count, first, last, error) -> logger.error("Observed non-Throwable error: {}", error);
 
-        };
 
         // TODO: This version of Agrona doesn't seem to have a DistinctErrorLog constructor that takes an ErrorConsumer
 
